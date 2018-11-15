@@ -14,6 +14,7 @@
 
 import * as sentry from '@sentry/electron';
 import * as events from 'events';
+import * as jsonic from 'jsonic';
 
 import * as digitalocean_api from '../cloud/digitalocean_api';
 import * as errors from '../infrastructure/errors';
@@ -73,6 +74,22 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// TODO: ignore case of fields
+// TODO: check type of fields
+// TODO: ignore anything before and after {}?
+function parseManualServerConfig(userInput: string): server.ManualServerConfig {
+  const config = jsonic(userInput) as server.ManualServerConfig;
+
+  if (!config.apiUrl) {
+    throw new Error('no apiUrl field');
+  }
+  if (!config.certSha256) {
+    throw new Error('no certSha256 field');
+  }
+
+  return config;
+}
+
 type DigitalOceanSessionFactory = (accessToken: string) => digitalocean_api.DigitalOceanSession;
 type DigitalOceanServerRepositoryFactory = (session: digitalocean_api.DigitalOceanSession) =>
     server.ManagedServerRepository;
@@ -122,19 +139,24 @@ export class App {
       this.renameAccessKey(event.detail.accessKeyId, event.detail.newName, event.detail.entry);
     });
 
-    appRoot.addEventListener('ManualServerEntered', (event: PolymerEvent) => {
-      const manualServerEntryEl = appRoot.getManualServerEntry();
-      const userInputConfig = event.detail.userInputConfig;
-      if (!userInputConfig) {
-        manualServerEntryEl.showConnection = false;
-        const errorTitle = 'Failed to import server';
-        const errorText =
-            'Please paste the output from the installation process before proceeding.';
-        this.appRoot.showManualServerError(errorTitle, errorText);
-        return;
+    // the ui wants us to validate a server management url.
+    // "reply" by setting a field on the template.
+    appRoot.addEventListener('ManualServerEdited', (event: PolymerEvent) => {
+      let isValid = true;
+      try {
+        parseManualServerConfig(event.detail.userInput);
+      } catch (e) {
+        isValid = false;
       }
-      userInputConfig.replace(/\s+/g, '');  // Remove whitespace
-      this.createManualServer(userInputConfig)
+      const manualServerEntryEl = appRoot.getManualServerEntry();
+      manualServerEntryEl.enableDoneButton = isValid;
+    });
+
+    appRoot.addEventListener('ManualServerEntered', (event: PolymerEvent) => {
+      const userInput = event.detail.userInput;
+
+      const manualServerEntryEl = appRoot.getManualServerEntry();
+      this.createManualServer(userInput)
           .then(() => {
             // Clear fields on outline-manual-server-entry (e.g. dismiss the connecting popup).
             manualServerEntryEl.clear();
@@ -151,8 +173,8 @@ export class App {
               if (e.message) {
                 errorMessage += `${e.message}\n`;
               }
-              if (userInputConfig) {
-                errorMessage += userInputConfig;
+              if (userInput) {
+                errorMessage += userInput;
               }
               appRoot.openManualInstallFeedback(errorMessage);
             }
@@ -245,8 +267,8 @@ export class App {
   // While this method does not make any assumptions on whether the server is reachable, it does
   // assume that its management API URL is available.
   private async syncServerToDisplay(server: server.Server): Promise<DisplayServer> {
-    // We key display servers by the server management API URL, which can be retrieved independently
-    // of the server health.
+    // We key display servers by the server management API URL, which can be retrieved
+    // independently of the server health.
     const displayServerId = server.getManagementApiUrl();
     let displayServer = this.displayServerRepository.findServer(displayServerId);
     if (!displayServer) {
@@ -260,8 +282,8 @@ export class App {
       this.displayServerRepository.addServer(displayServer);
       this.syncDisplayServersToUi();
     } else {
-      // We may need to update the stored display server if it was persisted when the server was not
-      // healthy, or the server has been renamed.
+      // We may need to update the stored display server if it was persisted when the server was
+      // not healthy, or the server has been renamed.
       try {
         const remoteServerName = server.getName();
         if (displayServer.name !== remoteServerName) {
@@ -300,8 +322,8 @@ export class App {
     let server: server.Server = null;
     if (displayServer.isManaged) {
       if (!!this.digitalOceanRepository) {
-        // Fetch the servers from memory to prevent a leak that happens due to polling when creating
-        // a new object for a server whose creation has been cancelled.
+        // Fetch the servers from memory to prevent a leak that happens due to polling when
+        // creating a new object for a server whose creation has been cancelled.
         const managedServers = await this.digitalOceanRepository.listServers(false);
         server = managedServers.find(
             (managedServer) => managedServer.getManagementApiUrl() === apiManagementUrl);
@@ -614,8 +636,8 @@ export class App {
   // Opens the screen to create a server.
   private showCreateServer() {
     const regionPicker = this.appRoot.getAndShowRegionPicker();
-    // The region picker initially shows all options as disabled. Options are enabled by this code,
-    // after checking which regions are available.
+    // The region picker initially shows all options as disabled. Options are enabled by this
+    // code, after checking which regions are available.
     this.digitalOceanRetry(() => {
           return this.digitalOceanRepository.getRegionMap();
         })
@@ -811,9 +833,9 @@ export class App {
           },
           (e) => {
             // Since failures are invisible to users we generally want exceptions here to bubble
-            // up and trigger a Sentry report. The exception is network errors, about which we can't
-            // do much (note: ShadowboxServer generates a breadcrumb for failures regardless which
-            // will show up when someone explicitly submits feedback).
+            // up and trigger a Sentry report. The exception is network errors, about which we
+            // can't do much (note: ShadowboxServer generates a breadcrumb for failures regardless
+            // which will show up when someone explicitly submits feedback).
             if (e instanceof errors.ServerApiError && e.isNetworkError()) {
               return;
             }
@@ -865,27 +887,13 @@ export class App {
 
   // Returns promise which fulfills when the server is created successfully,
   // or rejects with an error message that can be displayed to the user.
-  public createManualServer(userInputConfig: string): Promise<void> {
-    // Parse and validate user input.
+  public createManualServer(userInput: string): Promise<void> {
     let serverConfig: server.ManualServerConfig;
     try {
-      // Remove anything before the first '{' and after the last '}', in case
-      // the user accidentally copied extra from the install script.
-      userInputConfig = userInputConfig.substr(userInputConfig.indexOf('{'));
-      userInputConfig = userInputConfig.substr(0, userInputConfig.lastIndexOf('}') + 1);
-      serverConfig = JSON.parse(userInputConfig);
+      serverConfig = parseManualServerConfig(userInput);
     } catch (e) {
-      console.error('Invalid server configuration: could not parse JSON.');
-      return Promise.reject(new Error(''));
-    }
-    if (!serverConfig.apiUrl) {
-      const msg = 'Invalid server configuration: apiUrl is missing.';
-      console.error(msg);
-      return Promise.reject(new Error(msg));
-    } else if (!serverConfig.certSha256) {
-      const msg = 'Invalid server configuration: certSha256 is missing.';
-      console.error(msg);
-      return Promise.reject(new Error(msg));
+      // should never happen as the ui validats at each step - nevertheless...
+      return Promise.reject(new Error(`could not parse server config: ${e.message}`));
     }
 
     // Don't let `ManualServerRepository.addServer` throw to avoid redundant error handling if we
