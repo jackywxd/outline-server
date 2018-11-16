@@ -81,8 +81,13 @@
       .drop-down:hover {
         cursor: pointer;
       }
+      /* This element surrounds the copy and paste elements. */
       .section-content {
         margin: 24px 12px 0 48px;
+        padding: 24px;
+        background-color: #ECEFF1;
+        border-radius: 4px;
+        border-bottom: 2px solid #263238;
       }
       .section-content-instructions {
         margin: 24px 12px;
@@ -100,15 +105,21 @@
         margin-left: 4px;
         vertical-align: middle;
       }
-      .code {
-        background-color: #ECEFF1;
+      paper-textarea {
+        --iron-autogrow-textarea: {
+          color: var(--dark-gray);
+          font-size: 14px;
+          font-family: RobotoMono-Regular, monospace;
+          line-height: 24px;
+          word-break: break-all;
+        }
+      }
+      /* TODO: Seems like a @mixin would help here. */      
+      #command {
         color: var(--dark-gray);
         font-size: 14px;
         font-family: RobotoMono-Regular, monospace;
         line-height: 24px;
-        border-radius: 4px;
-        border-bottom: 2px solid #263238;
-        padding: 24px;
         word-break: break-all;
       }
       paper-textarea {
@@ -250,7 +261,7 @@
             <div class="instructions">Paste your installation output here.</div>
           </div>
           <div class="section-content">
-            <paper-textarea id="serverConfig" type="text" placeholder$="[[placeholderText]]" class="code" rows="4" on-value-changed='onServerConfigChanged'></textarea>
+            <paper-textarea id="serverConfig" type="text" placeholder$="[[placeholderText]]" class="code" rows="4" max-rows="4" no-label-float on-value-changed='onServerConfigChanged'></paper-textarea>
           </div>
         </div>
         <div id="button-row">
