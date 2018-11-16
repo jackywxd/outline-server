@@ -114,7 +114,7 @@
           word-break: break-all;
         }
       }
-      /* TODO: Seems like a @mixin would help here. */      
+      /* TODO: Seems like a @mixin would help avoid duplication. */      
       #command {
         color: var(--dark-gray);
         font-size: 14px;
@@ -197,10 +197,10 @@
               <outline-cloud-instructions-view title="Assign firewall rule" thumbnail-path="images/gcp-thumbnail-2.png" image-path="images/gcp-screenshot-2.png"">
                 <ol>
                   <li>Navigate to the <a href="https://console.cloud.google.com/compute/instances">VM instances screen<iron-icon icon="open-in-new"></iron-icon></a>.</li>
-                <li>Click on the instance where you want to host Outline.</li>
-                <li>Click 'EDIT' at the top of the VM Instance details screen.</li>
-                <li>Type 'outline' in the 'Network tags' field.</li>
-                <li>Click 'SAVE'.</li>
+                  <li>Click on the instance where you want to host Outline.</li>
+                  <li>Click 'EDIT' at the top of the VM Instance details screen.</li>
+                  <li>Type 'outline' in the 'Network tags' field.</li>
+                  <li>Click 'SAVE'.</li>
                 </ol>
               </outline-cloud-instructions-view>
             </div>

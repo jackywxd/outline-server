@@ -875,7 +875,7 @@ export class App {
     try {
       serverConfig = parseManualServerConfig(userInput);
     } catch (e) {
-      // should never happen as the ui validates at each step - nevertheless...
+      // This shouldn't happen because the UI validates the URL before enabling the DONE button.
       return Promise.reject(new Error(`could not parse server config: ${e.message}`));
     }
 
