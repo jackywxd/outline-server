@@ -353,7 +353,6 @@
         icon.icon = dropDown.opened ? 'arrow-drop-up' : 'arrow-drop-down';
       },
       onServerConfigChanged: function () {
-        console.log('a');
         this.fire('ManualServerEdited', {
           userInput: this.$.serverConfig.value
         });

@@ -139,15 +139,13 @@ export class App {
       this.renameAccessKey(event.detail.accessKeyId, event.detail.newName, event.detail.entry);
     });
 
-    // the ui wants us to validate a server management url.
-    // "reply" by setting a field on the template.
+    // The UI wants us to validate a server management URL.
+    // "Reply" by setting a field on the relevant template.
     appRoot.addEventListener('ManualServerEdited', (event: PolymerEvent) => {
-      console.log('b');
       let isValid = true;
       try {
         parseManualServerConfig(event.detail.userInput);
       } catch (e) {
-        console.log('NOPE', e.message);
         isValid = false;
       }
       const manualServerEntryEl = appRoot.getManualServerEntry();
