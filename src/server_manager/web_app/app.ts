@@ -14,7 +14,6 @@
 
 import * as sentry from '@sentry/electron';
 import * as events from 'events';
-import * as jsonic from 'jsonic';
 
 import * as digitalocean_api from '../cloud/digitalocean_api';
 import * as errors from '../infrastructure/errors';
@@ -23,6 +22,7 @@ import * as server from '../model/server';
 import {TokenManager} from './digitalocean_oauth';
 import * as digitalocean_server from './digitalocean_server';
 import {DisplayServer, DisplayServerRepository} from './display_server';
+import {parseManualServerConfig} from './management_urls';
 
 // tslint:disable-next-line:no-any
 type Polymer = HTMLElement&any;
@@ -72,22 +72,6 @@ function isManualServer(testServer: server.Server): testServer is server.ManualS
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// TODO: ignore case of fields
-// TODO: check type of fields
-// TODO: ignore anything before and after {}?
-function parseManualServerConfig(userInput: string): server.ManualServerConfig {
-  const config = jsonic(userInput) as server.ManualServerConfig;
-
-  if (!config.apiUrl) {
-    throw new Error('no apiUrl field');
-  }
-  if (!config.certSha256) {
-    throw new Error('no certSha256 field');
-  }
-
-  return config;
 }
 
 type DigitalOceanSessionFactory = (accessToken: string) => digitalocean_api.DigitalOceanSession;
