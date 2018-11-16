@@ -142,10 +142,12 @@ export class App {
     // the ui wants us to validate a server management url.
     // "reply" by setting a field on the template.
     appRoot.addEventListener('ManualServerEdited', (event: PolymerEvent) => {
+      console.log('b');
       let isValid = true;
       try {
         parseManualServerConfig(event.detail.userInput);
       } catch (e) {
+        console.log('NOPE', e.message);
         isValid = false;
       }
       const manualServerEntryEl = appRoot.getManualServerEntry();
@@ -154,7 +156,6 @@ export class App {
 
     appRoot.addEventListener('ManualServerEntered', (event: PolymerEvent) => {
       const userInput = event.detail.userInput;
-
       const manualServerEntryEl = appRoot.getManualServerEntry();
       this.createManualServer(userInput)
           .then(() => {
@@ -267,8 +268,8 @@ export class App {
   // While this method does not make any assumptions on whether the server is reachable, it does
   // assume that its management API URL is available.
   private async syncServerToDisplay(server: server.Server): Promise<DisplayServer> {
-    // We key display servers by the server management API URL, which can be retrieved
-    // independently of the server health.
+    // We key display servers by the server management API URL, which can be retrieved independently
+    // of the server health.
     const displayServerId = server.getManagementApiUrl();
     let displayServer = this.displayServerRepository.findServer(displayServerId);
     if (!displayServer) {
@@ -282,8 +283,8 @@ export class App {
       this.displayServerRepository.addServer(displayServer);
       this.syncDisplayServersToUi();
     } else {
-      // We may need to update the stored display server if it was persisted when the server was
-      // not healthy, or the server has been renamed.
+      // We may need to update the stored display server if it was persisted when the server was not
+      // healthy, or the server has been renamed.
       try {
         const remoteServerName = server.getName();
         if (displayServer.name !== remoteServerName) {
@@ -322,8 +323,8 @@ export class App {
     let server: server.Server = null;
     if (displayServer.isManaged) {
       if (!!this.digitalOceanRepository) {
-        // Fetch the servers from memory to prevent a leak that happens due to polling when
-        // creating a new object for a server whose creation has been cancelled.
+        // Fetch the servers from memory to prevent a leak that happens due to polling when creating
+        // a new object for a server whose creation has been cancelled.
         const managedServers = await this.digitalOceanRepository.listServers(false);
         server = managedServers.find(
             (managedServer) => managedServer.getManagementApiUrl() === apiManagementUrl);
@@ -636,8 +637,8 @@ export class App {
   // Opens the screen to create a server.
   private showCreateServer() {
     const regionPicker = this.appRoot.getAndShowRegionPicker();
-    // The region picker initially shows all options as disabled. Options are enabled by this
-    // code, after checking which regions are available.
+    // The region picker initially shows all options as disabled. Options are enabled by this code,
+    // after checking which regions are available.
     this.digitalOceanRetry(() => {
           return this.digitalOceanRepository.getRegionMap();
         })
@@ -833,9 +834,9 @@ export class App {
           },
           (e) => {
             // Since failures are invisible to users we generally want exceptions here to bubble
-            // up and trigger a Sentry report. The exception is network errors, about which we
-            // can't do much (note: ShadowboxServer generates a breadcrumb for failures regardless
-            // which will show up when someone explicitly submits feedback).
+            // up and trigger a Sentry report. The exception is network errors, about which we can't
+            // do much (note: ShadowboxServer generates a breadcrumb for failures regardless which
+            // will show up when someone explicitly submits feedback).
             if (e instanceof errors.ServerApiError && e.isNetworkError()) {
               return;
             }
@@ -892,7 +893,7 @@ export class App {
     try {
       serverConfig = parseManualServerConfig(userInput);
     } catch (e) {
-      // should never happen as the ui validats at each step - nevertheless...
+      // should never happen as the ui validates at each step - nevertheless...
       return Promise.reject(new Error(`could not parse server config: ${e.message}`));
     }
 

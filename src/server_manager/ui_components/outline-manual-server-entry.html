@@ -19,8 +19,8 @@
 <link rel='import' href='../bower_components/iron-icons/iron-icons.html'>
 <link rel='import' href='../bower_components/paper-button/paper-button.html'>
 <link rel='import' href='../bower_components/paper-dialog/paper-dialog.html'>
-<link rel='import' href='../bower_components/paper-progress/paper-progress.html'>
 <link rel='import' href='../bower_components/paper-input/paper-textarea.html'>
+<link rel='import' href='../bower_components/paper-progress/paper-progress.html'>
 <link rel="import" href="./cloud-install-styles.html">
 <link rel="import" href="./outline-cloud-instructions-view.html">
 <link rel="import" href="./outline-step-view.html">
@@ -111,7 +111,7 @@
         padding: 24px;
         word-break: break-all;
       }
-      textarea {
+      paper-textarea {
         width: 100%;
         border: none;
         outline: none;
@@ -122,27 +122,35 @@
         vertical-align: top;
         color: black;
       }
-      #aws-logo {
-        vertical-align: top;
-      }
-
       #button-row {
         display: flex;
         justify-content: space-between;
-        padding: 12px;
+        padding: 0 24px 24px 60px;
+        background-color: var(--background-contrast-color);
       }
       paper-button {
         margin: 0;
+      }
+      paper-progress {
+        margin: 0;
+      }
+      #cancelButton {
+        color: var(--light-gray);
+        border: 1px solid var(--border-color);
         border-radius: 2px;
         width: 45%;
+      }
+      #doneButton {
+        border-radius: 2px;
+        width: 45%;
+        background-color: var(--primary-green);
         color: var(--light-gray);
       }
-      /* TODO: can we have a classifier for !disabled? */
-      #doneButton {
-        background-color: green;
-      }
       #doneButton[disabled] {
-        background-color: red;
+        background-color: var(--border-color);
+      }
+      #aws-logo {
+        vertical-align: top;
       }
     </style>
     <outline-step-view>
@@ -163,11 +171,9 @@
           </div>
           <iron-collapse id="gcpDropDown">
             <div class="section-content-instructions">
-              <outline-cloud-instructions-view title="Create a firewall rule" thumbnail-path="images/gcp-thumbnail-1.png"
-                image-path="images/gcp-screenshot-1.png">
+              <outline-cloud-instructions-view title="Create a firewall rule" thumbnail-path="images/gcp-thumbnail-1.png" image-path="images/gcp-screenshot-1.png">
                 <ol>
-                  <li><a href="https://console.cloud.google.com/networking/firewalls/add">Add a new firewall rule<iron-icon
-                        icon="open-in-new"></iron-icon></a> to your Compute Engine project.</li>
+                  <li><a href="https://console.cloud.google.com/networking/firewalls/add">Add a new firewall rule<iron-icon icon="open-in-new"></iron-icon></a> to your Compute Engine project.</li>
                   <li>Type 'outline' in the 'Name' field.</li>
                   <li>Type 'outline' in the 'Target tags' field.</li>
                   <li>Type '0.0.0.0/0' in the 'Source IP ranges' field.</li>
@@ -177,12 +183,9 @@
               </outline-cloud-instructions-view>
             </div>
             <div class="section-content-instructions">
-              <outline-cloud-instructions-view title="Assign firewall rule" thumbnail-path="images/gcp-thumbnail-2.png"
-                image-path="images/gcp-screenshot-2.png"">
+              <outline-cloud-instructions-view title="Assign firewall rule" thumbnail-path="images/gcp-thumbnail-2.png" image-path="images/gcp-screenshot-2.png"">
                 <ol>
-                  <li>Navigate to the <a href="
-                https://console.cloud.google.com/compute/instances">VM instances screen<iron-icon icon="open-in-new">
-                </iron-icon></a>.</li>
+                  <li>Navigate to the <a href="https://console.cloud.google.com/compute/instances">VM instances screen<iron-icon icon="open-in-new"></iron-icon></a>.</li>
                 <li>Click on the instance where you want to host Outline.</li>
                 <li>Click 'EDIT' at the top of the VM Instance details screen.</li>
                 <li>Type 'outline' in the 'Network tags' field.</li>
@@ -205,11 +208,9 @@
           </div>
           <iron-collapse id="awsDropDown">
             <div class="section-content-instructions">
-              <outline-cloud-instructions-view title="Create a Security Group" thumbnail-path="images/aws-thumbnail-1.png"
-                image-path="images/aws-screenshot-1.png">
+              <outline-cloud-instructions-view title="Create a Security Group" thumbnail-path="images/aws-thumbnail-1.png" image-path="images/aws-screenshot-1.png">
                 <ol>
-                  <li>Once you've created your EC2 instance, open the <a href="https://console.aws.amazon.com/ec2/v2/home">EC2
-                      Management Console<iron-icon icon="open-in-new"></iron-icon></a>.</li>
+                  <li>Once you've created your EC2 instance, open the <a href="https://console.aws.amazon.com/ec2/v2/home">EC2 Management Console<iron-icon icon="open-in-new"></iron-icon></a>.</li>
                   <li>Under 'Network & Security', select 'Security Groups'.</li>
                   <li>Click on 'Create Security Group'.</li>
                   <li>Type 'outline' in the 'Security group name' and 'Description' fields.</li>
@@ -219,11 +220,9 @@
               </outline-cloud-instructions-view>
             </div>
             <div class="section-content-instructions">
-              <outline-cloud-instructions-view title="Assign Security Group" thumbnail-path="images/aws-thumbnail-2.png"
-                image-path="images/aws-screenshot-2.png">
+              <outline-cloud-instructions-view title="Assign Security Group" thumbnail-path="images/aws-thumbnail-2.png" image-path="images/aws-screenshot-2.png">
                 <ol>
-                  <li>Navigate to <a href="https://console.aws.amazon.com/ec2/v2/home#Instances:sort=instanceId">Instances<iron-icon
-                        icon="open-in-new"></iron-icon></a>.</li>
+                  <li>Navigate to <a href="https://console.aws.amazon.com/ec2/v2/home#Instances:sort=instanceId">Instances<iron-icon icon="open-in-new"></iron-icon></a>.</li>
                   <li>Click 'Actions' > 'Networking' > 'Change Security Groups' at the top of the 'Instances' screen.</li>
                   <li>Select the 'outline' Security Group, unselect other security groups.</li>
                   <li>Click 'Assign Security Groups'.</li>
@@ -232,21 +231,18 @@
             </div>
           </iron-collapse>
         </div>
-
         <!-- Install command -->
         <div class="section">
           <div class="section-header">
             <span class="stepcircle" hidden$="[[!isGenericCloudProvider]]">1</span>
             <span class="stepcircle" hidden$="[[isGenericCloudProvider]]">2</span>
-            <div class="instructions">Log into your server and run this command.</div>
+            <div class="instructions">Log into your server, and run this command.</div>
           </div>
           <div class="section-content">
-            <div id="command" class="code">bash -c "$(wget -qO-
-              https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/src/server_manager/install_scripts/install_server.sh)"</div>
+            <div id="command" class="code">bash -c "$(wget -qO- https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/src/server_manager/install_scripts/install_server.sh)"</div>
           </div>
         </div>
-
-        <!-- Paste input. -->
+        <!-- Paste input -->
         <div class="section">
           <div class="section-header">
             <span class="stepcircle" hidden$="[[!isGenericCloudProvider]]">2</span>
@@ -254,19 +250,17 @@
             <div class="instructions">Paste your installation output here.</div>
           </div>
           <div class="section-content">
-            <paper-textarea id="serverConfig" type="text" placeholder$="[[placeholderText]]" class="code" rows="4"
-              on-value-changed='onServerConfigChanged'></textarea>
+            <paper-textarea id="serverConfig" type="text" placeholder$="[[placeholderText]]" class="code" rows="4" on-value-changed='onServerConfigChanged'></textarea>
           </div>
         </div>
         <div id="button-row">
-          <paper-button id="cancelButton" on-tap="cancelTapped">Cancel</paper-button>
-          <paper-button id="doneButton" on-tap="doneTapped" disabled$='[[!enableDoneButton]]'>Done</paper-button>
+          <paper-button id="cancelButton" on-tap="cancelTapped" class="secondary">CANCEL</paper-button>
+          <paper-button id="doneButton" on-tap="doneTapped" class="primary" disabled$='[[!enableDoneButton]]'>DONE</paper-button>
         </div>
         <paper-progress hidden$='[[!showConnection]]' indeterminate class="slow"></paper-progress>
       </div>
     </outline-step-view>
   </template>
-
   <script>
     Polymer({
       is: 'outline-manual-server-entry',
@@ -302,52 +296,53 @@
           value: false,
         },
       },
-      doneTapped: function () {
+      doneTapped: function() {
         this.showConnection = true;
         this.fire('ManualServerEntered', {
           userInput: this.$.serverConfig.value
         });
       },
-      cancelTapped: function () {
+      cancelTapped: function() {
         this.fire('ManualServerEntryCancelled');
       },
-      retryTapped: function () {
+      retryTapped: function() {
         this.showConnection = false;
         this.doneTapped();
       },
-      clear: function () {
+      clear: function() {
         this.$.serverConfig.value = '';
         this.showConnection = false;
         this.$.awsDropDown.hide();
         this.$.gcpDropDown.hide();
       },
-      _computeCloudProviderName: function (cloudProvider) {
-        switch (cloudProvider) {
+      _computeCloudProviderName: function(cloudProvider) {
+        switch(cloudProvider) {
           case 'aws': return 'Amazon Web Services';
           case 'gcp': return 'Google Cloud Platform';
           default: return '';
         }
       },
-      _computeIsCloudProviderAws: function (cloudProvider) {
+      _computeIsCloudProviderAws: function(cloudProvider) {
         return cloudProvider === 'aws'
       },
-      _computeIsCloudProviderGcp: function (cloudProvider) {
+      _computeIsCloudProviderGcp: function(cloudProvider) {
         return cloudProvider === 'gcp'
       },
-      _computeIsGenericCloudProvider: function (cloudProvider) {
+      _computeIsGenericCloudProvider: function(cloudProvider) {
         return cloudProvider === 'generic';
       },
-      _toggleAwsDropDown: function () {
+      _toggleAwsDropDown: function() {
         this._toggleDropDown(this.$.awsDropDown, this.$.awsDropDownIcon)
       },
-      _toggleGcpDropDown: function () {
+      _toggleGcpDropDown: function() {
         this._toggleDropDown(this.$.gcpDropDown, this.$.gcpDropDownIcon);
       },
-      _toggleDropDown: function (dropDown, icon) {
+      _toggleDropDown: function(dropDown, icon) {
         dropDown.toggle();
         icon.icon = dropDown.opened ? 'arrow-drop-up' : 'arrow-drop-down';
       },
       onServerConfigChanged: function () {
+        console.log('a');
         this.fire('ManualServerEdited', {
           userInput: this.$.serverConfig.value
         });
